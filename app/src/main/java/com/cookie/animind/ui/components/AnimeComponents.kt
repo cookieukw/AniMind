@@ -67,8 +67,7 @@ fun AnimeCard(anime: AnimeMedia, fullWidth: Boolean = false, onClick: () -> Unit
                     contentDescription = anime.title?.romaji,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                        .height(180.dp),
                     contentScale = ContentScale.Crop
                 )
                 if (anime.averageScore != null) {
