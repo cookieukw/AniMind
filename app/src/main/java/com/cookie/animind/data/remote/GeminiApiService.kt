@@ -32,8 +32,8 @@ data class Candidate(
 )
 
 interface GeminiApiService {
-    // We use gemini-3.5-flash for the chat and analysis.
-    @POST("v1beta/models/gemini-1.5-flash:generateContent")
+    // We use gemini-3.1-flash-lite as requested by the user
+    @POST("v1beta/models/gemini-3.1-flash-lite:generateContent")
     suspend fun generateContent(
         @Query("key") apiKey: String,
         @Body request: GenerateContentRequest

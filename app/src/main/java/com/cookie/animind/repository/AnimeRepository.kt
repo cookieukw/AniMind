@@ -197,6 +197,9 @@ class AnimeRepository {
         return try {
             val response = gemini.generateContent(apiKey, request)
             response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: "No response from AI."
+        } catch (e: retrofit2.HttpException) {
+            val errorBody = e.response()?.errorBody()?.string() ?: e.message()
+            "Error analyzing with AI (HTTP ${e.code()}): $errorBody"
         } catch (e: Exception) {
             "Error analyzing with AI: ${e.message}"
         }
