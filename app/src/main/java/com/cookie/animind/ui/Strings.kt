@@ -1,0 +1,91 @@
+package com.cookie.animind.ui
+
+object Strings {
+    fun get(key: String, language: String, vararg args: Any): String {
+        val strings = if (language == "Português") ptBR else enUS
+        val text = strings[key] ?: enUS[key] ?: key
+        return if (args.isNotEmpty()) String.format(text, *args) else text
+    }
+
+    private val ptBR = mapOf(
+        "search_hint" to "Procurar Anime...",
+        "home" to "Início",
+        "explore" to "Explorar",
+        "favorites" to "Favoritos",
+        "settings" to "Config.",
+        "search_results" to "Resultados da Busca",
+        "trending_now" to "No Momento",
+        "recently_released" to "Lançamentos",
+        "romance" to "Romance",
+        "movies" to "Filmes",
+        "no_favorites" to "Você ainda não possui animes favoritos salvos.",
+        "my_favorites" to "Meus Favoritos",
+        "anime_not_found" to "Anime não encontrado",
+        "global_score" to "SCORE GLOBAL",
+        "popularity" to "POPULARIDADE",
+        "status" to "STATUS",
+        "episodes" to "EPISÓDIOS",
+        "overview" to "Visão Geral",
+        "synopsis" to "Sinopse",
+        "should_i_watch" to "Devo Assistir?",
+        "analyst" to "Análise IA",
+        "community_vibes" to "Vibrações da Comunidade",
+        "generate_hot_takes" to "Ver Avaliações",
+        "similar_anime" to "Animes Similares",
+        "settings_title" to "Configurações",
+        "use_ai" to "Usar Inteligência Artificial",
+        "use_ai_desc" to "Ativar ou desativar análises e recomendações da IA.",
+        "api_key" to "Gemini API Key",
+        "api_key_desc" to "Sua chave de acesso para a API do Gemini.",
+        "api_key_hint" to "Insira sua API Key",
+        "response_mode" to "Modo de Resposta (IA)",
+        "response_mode_desc" to "Define como a inteligência artificial vai responder.",
+        "language" to "Idioma",
+        "language_desc" to "Idioma padrão das informações e resumos.",
+        "unknown" to "Desconhecido",
+        "short" to "Curta",
+        "detailed" to "Detalhada",
+        "direct_recommendation" to "Recomendação Direta"
+    )
+
+    private val enUS = mapOf(
+        "search_hint" to "Search Anime...",
+        "home" to "Home",
+        "explore" to "Explore",
+        "favorites" to "Favorites",
+        "settings" to "Settings",
+        "search_results" to "Search Results",
+        "trending_now" to "Trending Now",
+        "recently_released" to "Recently Released",
+        "romance" to "Romance",
+        "movies" to "Movies",
+        "no_favorites" to "You have no saved favorite animes yet.",
+        "my_favorites" to "My Favorites",
+        "anime_not_found" to "Anime not found",
+        "global_score" to "GLOBAL SCORE",
+        "popularity" to "POPULARITY",
+        "status" to "STATUS",
+        "episodes" to "EPISODES",
+        "overview" to "Overview",
+        "synopsis" to "Synopsis",
+        "should_i_watch" to "Should I Watch?",
+        "analyst" to "AI Analyst",
+        "community_vibes" to "Community Vibes",
+        "generate_hot_takes" to "View Real Reviews",
+        "similar_anime" to "Similar Anime",
+        "settings_title" to "Settings",
+        "use_ai" to "Use Artificial Intelligence",
+        "use_ai_desc" to "Enable or disable AI analysis and recommendations.",
+        "api_key" to "Gemini API Key",
+        "api_key_desc" to "Your access key for the Gemini API.",
+        "api_key_hint" to "Enter your API Key",
+        "response_mode" to "Response Mode (AI)",
+        "response_mode_desc" to "Defines how the AI will respond.",
+        "language" to "Language",
+        "language_desc" to "Default language for information and summaries.",
+        "unknown" to "Unknown",
+        "short" to "Short",
+        "detailed" to "Detailed",
+        "direct_recommendation" to "Direct Recommendation"
+    )
+}

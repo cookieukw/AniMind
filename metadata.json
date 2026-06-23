@@ -1,0 +1,6 @@
+{
+  "name": "AniMind",
+  "description": "An AI-powered anime analyst to get reviews, recommendations, and episode breakdowns.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
