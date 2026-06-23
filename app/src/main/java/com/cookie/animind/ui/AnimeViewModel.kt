@@ -88,7 +88,11 @@ class AnimeViewModel : ViewModel() {
 
     fun searchAnime(query: String) {
         if (query.isBlank()) {
-            loadLists()
+            // Just clear search results, don't reload everything
+            val currentSuccess = _uiState.value as? UiState.Success
+            if (currentSuccess != null) {
+                _uiState.value = currentSuccess.copy(searchResults = null)
+            }
             return
         }
         viewModelScope.launch {
@@ -113,8 +117,13 @@ class AnimeViewModel : ViewModel() {
         _analysisResult.value = null
         _communityComments.value = null
         _chatHistory.value = emptyList()
-        viewModelScope.launch {
-            _similarAnime.value = repo.getTrendingAnime().shuffled().take(5)
+        // Use cached trending data instead of making a network call
+        val currentSuccess = _uiState.value as? UiState.Success
+        if (currentSuccess != null) {
+            _similarAnime.value = currentSuccess.trending
+                .filter { it.id != anime.id }
+                .shuffled()
+                .take(5)
         }
     }
 

@@ -26,7 +26,7 @@ class AnimeRepository {
     private suspend fun getCategoryAnime(filter: String): List<AnimeMedia> {
         val query = """
             query {
-              Page(page: 1, perPage: 15) {
+              Page(page: 1, perPage: 8) {
                 media(type: ANIME, $filter) {
                   id
                   title {

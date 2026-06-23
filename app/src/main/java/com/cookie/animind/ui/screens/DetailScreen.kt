@@ -68,10 +68,7 @@ fun DetailScreen(
                 // Hero Image with Gradient Overlay
                 Box(modifier = Modifier.fillMaxWidth().height(400.dp)) {
                     AsyncImage(
-                        model = coil.request.ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
-                            .data(anime?.coverImage?.extraLarge ?: anime?.coverImage?.large)
-                            .crossfade(true)
-                            .build(),
+                        model = anime?.coverImage?.extraLarge ?: anime?.coverImage?.large,
                         contentDescription = "Cover",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop

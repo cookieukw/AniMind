@@ -20,6 +20,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -102,215 +104,247 @@ fun HomeScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            when (selectedTab) {
-                0 -> {
-                    when (val state = uiState) {
-                        is UiState.Loading -> {
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                        is UiState.Error -> {
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("Error: ${state.message}", color = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                        is UiState.Success -> {
-                            LazyColumn(
-                                contentPadding = PaddingValues(bottom = 16.dp),
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                // AI BANNER
-                                item {
-                                    Card(
-                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(16.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(Icons.Default.Search, contentDescription = "AI", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
-                                            Spacer(modifier = Modifier.width(12.dp))
-                                            Column {
-                                                Text(if (language == "Português") "\uD83E\uDD16 Descubra o próximo anime" else "\uD83E\uDD16 Discover your next anime", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                                                Text(if (language == "Português") "Use a inteligência artificial para achar." else "Use artificial intelligence to find it.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                                            }
-                                        }
-                                    }
-                                }
+            // Use Box with visibility instead of when{} to preserve tab state
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (selectedTab == 0) {
+                    HomeTab(uiState, language, viewModel, onAnimeClick)
+                }
+                if (selectedTab == 1) {
+                    SearchTab(searchQuery, { searchQuery = it }, uiState, language, viewModel, onAnimeClick)
+                }
+                if (selectedTab == 2) {
+                    FavoritesTab(viewModel, language, onAnimeClick)
+                }
+                if (selectedTab == 3) {
+                    SettingsScreen(viewModel = viewModel, onBackClick = {})
+                }
+            }
+        }
+    }
+}
 
-                                // HERO BANNER
-                                if (state.trending.isNotEmpty()) {
-                                    val heroAnime = state.trending.first()
-                                    item {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(16.dp)
-                                                .height(200.dp)
-                                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(24.dp))
-                                                .clickable {
-                                                    viewModel.selectAnime(heroAnime)
-                                                    onAnimeClick(heroAnime)
-                                                }
-                                        ) {
-                                            AsyncImage(
-                                                model = heroAnime.coverImage?.extraLarge ?: heroAnime.coverImage?.large,
-                                                contentDescription = heroAnime.title?.romaji,
-                                                modifier = Modifier.fillMaxSize(),
-                                                contentScale = ContentScale.Crop
-                                            )
-                                            // Gradient Overlay
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxSize()
-                                                    .background(
-                                                        androidx.compose.ui.graphics.Brush.verticalGradient(
-                                                            colors = listOf(
-                                                                androidx.compose.ui.graphics.Color.Transparent,
-                                                                MaterialTheme.colorScheme.background.copy(alpha = 0.9f)
-                                                            )
-                                                        )
-                                                    )
-                                            )
-                                            Column(
-                                                modifier = Modifier
-                                                    .align(Alignment.BottomStart)
-                                                    .padding(16.dp)
-                                            ) {
-                                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                                    Icon(Icons.Default.Star, contentDescription = null, tint = androidx.compose.ui.graphics.Color(0xFFFFC107), modifier = Modifier.size(16.dp))
-                                                    Spacer(modifier = Modifier.width(4.dp))
-                                                    Text("${heroAnime.averageScore ?: "??"}%", style = MaterialTheme.typography.labelMedium, color = androidx.compose.ui.graphics.Color.White, fontWeight = FontWeight.Bold)
-                                                }
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text(
-                                                    heroAnime.title?.english ?: heroAnime.title?.romaji ?: "Unknown",
-                                                    style = MaterialTheme.typography.headlineSmall,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = androidx.compose.ui.graphics.Color.White,
-                                                    maxLines = 1,
-                                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                                                )
-                                            }
-                                        }
-                                    }
-                                    
-                                    item {
-                                        TopicRow(if (language == "Português") "🔥 Em Alta" else "🔥 Trending Now", state.trending.drop(1), viewModel, onAnimeClick)
-                                    }
-                                }
+@Composable
+private fun HomeTab(
+    uiState: UiState,
+    language: String,
+    viewModel: AnimeViewModel,
+    onAnimeClick: (AnimeMedia) -> Unit
+) {
+    when (uiState) {
+        is UiState.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+        is UiState.Error -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Error: ${uiState.message}", color = MaterialTheme.colorScheme.error)
+            }
+        }
+        is UiState.Success -> {
+            val bgColor = MaterialTheme.colorScheme.background
+            val heroGradient = remember(bgColor) {
+                Brush.verticalGradient(
+                    colors = listOf(Color.Transparent, bgColor.copy(alpha = 0.9f))
+                )
+            }
 
-                                if (state.romance.isNotEmpty()) {
-                                    item { Spacer(modifier = Modifier.height(24.dp)) }
-                                    item {
-                                        TopicRow(if (language == "Português") "⭐ Melhor Avaliados (Romance)" else "⭐ Top Rated Romance", state.romance, viewModel, onAnimeClick)
-                                    }
-                                }
-                                
-                                if (state.recent.isNotEmpty()) {
-                                    item { Spacer(modifier = Modifier.height(24.dp)) }
-                                    item {
-                                        TopicRow(if (language == "Português") "🆕 Temporada Atual" else "🆕 Current Season", state.recent, viewModel, onAnimeClick)
-                                    }
-                                }
-
-                                if (state.movies.isNotEmpty()) {
-                                    item { Spacer(modifier = Modifier.height(24.dp)) }
-                                    item {
-                                        TopicRow(if (language == "Português") "\uD83C\uDFAC Filmes Recomendados" else "\uD83C\uDFAC Recommended Movies", state.movies, viewModel, onAnimeClick)
-                                    }
-                                }
+            LazyColumn(
+                contentPadding = PaddingValues(bottom = 16.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // AI BANNER
+                item(key = "ai_banner") {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Search, contentDescription = "AI", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(if (language == "Português") "\uD83E\uDD16 Descubra o próximo anime" else "\uD83E\uDD16 Discover your next anime", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                                Text(if (language == "Português") "Use a inteligência artificial para achar." else "Use artificial intelligence to find it.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
                             }
                         }
                     }
                 }
-                1 -> {
-                    // Search Tab
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        OutlinedTextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
+
+                // HERO BANNER
+                if (uiState.trending.isNotEmpty()) {
+                    val heroAnime = uiState.trending.first()
+                    item(key = "hero_${heroAnime.id}") {
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 16.dp)
-                                .height(56.dp),
-                            placeholder = { Text(if (language == "Português") "Buscar anime..." else "Search anime...", style = MaterialTheme.typography.bodyMedium) },
-                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(24.dp)) },
-                            singleLine = true,
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                            ),
-                            textStyle = MaterialTheme.typography.bodyMedium
-                        )
-
-                        when (val state = uiState) {
-                            is UiState.Success -> {
-                                if (!state.searchResults.isNullOrEmpty() && searchQuery.isNotBlank()) {
-                                    LazyColumn(contentPadding = PaddingValues(16.dp)) {
-                                        items(state.searchResults, key = { it.id }) { anime ->
-                                            AnimeListItem(anime) {
-                                                viewModel.selectAnime(anime)
-                                                onAnimeClick(anime)
-                                            }
-                                        }
-                                    }
-                                } else if (searchQuery.isNotBlank()) {
-                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                        Text(if (language == "Português") "Nenhum resultado." else "No results.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    }
-                                } else {
-                                     Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                                        Text(
-                                            if (language == "Português") "Digite algo para buscar..." else "Type something to search...", 
-                                            style = MaterialTheme.typography.bodyLarge, 
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant, 
-                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                                        )
-                                    }
+                                .padding(16.dp)
+                                .height(200.dp)
+                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(24.dp))
+                                .clickable {
+                                    viewModel.selectAnime(heroAnime)
+                                    onAnimeClick(heroAnime)
                                 }
-                            }
-                            else -> {}
-                        }
-                    }
-                }
-                2 -> {
-                    // Favorites
-                    val favorites by viewModel.favorites.collectAsStateWithLifecycle()
-                    
-                    Text(
-                        Strings.get("my_favorites", language),
-                        style = MaterialTheme.typography.headlineMedium,
-                        modifier = Modifier.padding(16.dp),
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    if (favorites.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                            Text(
-                                Strings.get("no_favorites", language),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        ) {
+                            AsyncImage(
+                                model = heroAnime.coverImage?.extraLarge ?: heroAnime.coverImage?.large,
+                                contentDescription = heroAnime.title?.romaji,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
                             )
-                        }
-                    } else {
-                        LazyColumn(contentPadding = PaddingValues(16.dp)) {
-                            items(favorites, key = { it.id }) { anime ->
-                                AnimeListItem(anime) {
-                                    viewModel.selectAnime(anime)
-                                    onAnimeClick(anime)
+                            // Gradient Overlay - cached brush
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(heroGradient)
+                            )
+                            Column(
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(16.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFC107), modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("${heroAnime.averageScore ?: "??"}%", style = MaterialTheme.typography.labelMedium, color = Color.White, fontWeight = FontWeight.Bold)
                                 }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    heroAnime.title?.english ?: heroAnime.title?.romaji ?: "Unknown",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
                             }
                         }
                     }
+
+                    item(key = "trending_row") {
+                        TopicRow(if (language == "Português") "🔥 Em Alta" else "🔥 Trending Now", uiState.trending.drop(1), viewModel, onAnimeClick)
+                    }
                 }
-                3 -> {
-                    SettingsScreen(viewModel = viewModel, onBackClick = {})
+
+                if (uiState.romance.isNotEmpty()) {
+                    item(key = "spacer_romance") { Spacer(modifier = Modifier.height(24.dp)) }
+                    item(key = "romance_row") {
+                        TopicRow(if (language == "Português") "⭐ Melhor Avaliados (Romance)" else "⭐ Top Rated Romance", uiState.romance, viewModel, onAnimeClick)
+                    }
+                }
+
+                if (uiState.recent.isNotEmpty()) {
+                    item(key = "spacer_recent") { Spacer(modifier = Modifier.height(24.dp)) }
+                    item(key = "recent_row") {
+                        TopicRow(if (language == "Português") "🆕 Temporada Atual" else "🆕 Current Season", uiState.recent, viewModel, onAnimeClick)
+                    }
+                }
+
+                if (uiState.movies.isNotEmpty()) {
+                    item(key = "spacer_movies") { Spacer(modifier = Modifier.height(24.dp)) }
+                    item(key = "movies_row") {
+                        TopicRow(if (language == "Português") "\uD83C\uDFAC Filmes Recomendados" else "\uD83C\uDFAC Recommended Movies", uiState.movies, viewModel, onAnimeClick)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchTab(
+    searchQuery: String,
+    onSearchChange: (String) -> Unit,
+    uiState: UiState,
+    language: String,
+    viewModel: AnimeViewModel,
+    onAnimeClick: (AnimeMedia) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+                .height(56.dp),
+            placeholder = { Text(if (language == "Português") "Buscar anime..." else "Search anime...", style = MaterialTheme.typography.bodyMedium) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(24.dp)) },
+            singleLine = true,
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline
+            ),
+            textStyle = MaterialTheme.typography.bodyMedium
+        )
+
+        when (uiState) {
+            is UiState.Success -> {
+                if (!uiState.searchResults.isNullOrEmpty() && searchQuery.isNotBlank()) {
+                    LazyColumn(contentPadding = PaddingValues(16.dp)) {
+                        items(uiState.searchResults, key = { it.id }) { anime ->
+                            AnimeListItem(anime) {
+                                viewModel.selectAnime(anime)
+                                onAnimeClick(anime)
+                            }
+                        }
+                    }
+                } else if (searchQuery.isNotBlank()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(if (language == "Português") "Nenhum resultado." else "No results.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                } else {
+                    Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            if (language == "Português") "Digite algo para buscar..." else "Type something to search...",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                }
+            }
+            else -> {}
+        }
+    }
+}
+
+@Composable
+private fun FavoritesTab(
+    viewModel: AnimeViewModel,
+    language: String,
+    onAnimeClick: (AnimeMedia) -> Unit
+) {
+    val favorites by viewModel.favorites.collectAsStateWithLifecycle()
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Text(
+            Strings.get("my_favorites", language),
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(16.dp),
+            fontWeight = FontWeight.Bold
+        )
+
+        if (favorites.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+                Text(
+                    Strings.get("no_favorites", language),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+            }
+        } else {
+            LazyColumn(contentPadding = PaddingValues(16.dp)) {
+                items(favorites, key = { it.id }) { anime ->
+                    AnimeListItem(anime) {
+                        viewModel.selectAnime(anime)
+                        onAnimeClick(anime)
+                    }
                 }
             }
         }
@@ -349,7 +383,7 @@ fun NavBarItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: Str
 
 @Composable
 fun TopicRow(title: String, animes: List<AnimeMedia>, viewModel: AnimeViewModel, onAnimeClick: (AnimeMedia) -> Unit) {
-    Column {
+    Column(modifier = Modifier.height(310.dp)) {
         Text(
             title,
             style = MaterialTheme.typography.titleLarge,
