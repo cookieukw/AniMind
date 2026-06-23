@@ -27,6 +27,7 @@ data class PageData(
     val reviews: List<Review>?
 )
 
+@androidx.compose.runtime.Immutable
 @JsonClass(generateAdapter = true)
 data class Review(
     val id: Int,
@@ -36,18 +37,21 @@ data class Review(
     val user: ReviewUser?
 )
 
+@androidx.compose.runtime.Immutable
 @JsonClass(generateAdapter = true)
 data class ReviewUser(
     val name: String?,
     val avatar: UserAvatar?
 )
 
+@androidx.compose.runtime.Immutable
 @JsonClass(generateAdapter = true)
 data class UserAvatar(
     val large: String?,
     val medium: String?
 )
 
+@androidx.compose.runtime.Immutable
 @JsonClass(generateAdapter = true)
 data class AnimeMedia(
     val id: Int,
@@ -61,6 +65,7 @@ data class AnimeMedia(
     val coverImage: CoverImage?
 )
 
+@androidx.compose.runtime.Immutable
 @JsonClass(generateAdapter = true)
 data class AnimeTitle(
     val romaji: String?,
@@ -68,6 +73,7 @@ data class AnimeTitle(
     val native: String?
 )
 
+@androidx.compose.runtime.Immutable
 @JsonClass(generateAdapter = true)
 data class CoverImage(
     val extraLarge: String?,
