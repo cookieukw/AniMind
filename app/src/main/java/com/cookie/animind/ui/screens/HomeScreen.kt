@@ -294,18 +294,17 @@ private fun SearchTab(
                         }
                     }
                 } else if (searchQuery.isNotBlank()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(if (language == "Português") "Nenhum resultado." else "No results.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+                    EmptyStateView(
+                        icon = Icons.Default.Search,
+                        title = if (language == "Português") "Nenhum anime encontrado" else "No anime found",
+                        subtitle = if (language == "Português") "Tente buscar por outro nome ou termo." else "Try searching for another name or term."
+                    )
                 } else {
-                    Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                        Text(
-                            if (language == "Português") "Digite algo para buscar..." else "Type something to search...",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
-                    }
+                    EmptyStateView(
+                        icon = Icons.Default.Search,
+                        title = if (language == "Português") "O que você quer assistir?" else "What do you want to watch?",
+                        subtitle = if (language == "Português") "Busque pelo nome do seu anime favorito." else "Search for your favorite anime name."
+                    )
                 }
             }
             else -> {}
@@ -330,14 +329,11 @@ private fun FavoritesTab(
         )
 
         if (favorites.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                Text(
-                    Strings.get("no_favorites", language),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-            }
+            EmptyStateView(
+                icon = Icons.Default.FavoriteBorder,
+                title = if (language == "Português") "Sua lista está vazia" else "Your list is empty",
+                subtitle = Strings.get("no_favorites", language)
+            )
         } else {
             LazyColumn(contentPadding = PaddingValues(16.dp)) {
                 items(favorites, key = { it.id }) { anime ->
@@ -401,5 +397,44 @@ fun TopicRow(title: String, animes: List<AnimeMedia>, viewModel: AnimeViewModel,
                 }
             }
         }
+    }
+}
+
+@Composable
+fun EmptyStateView(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, subtitle: String) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Surface(
+            shape = androidx.compose.foundation.shape.CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.size(100.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
     }
 }
