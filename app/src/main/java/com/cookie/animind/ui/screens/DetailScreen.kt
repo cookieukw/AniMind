@@ -276,11 +276,11 @@ fun DetailScreen(
                         ) {
                             items(comments!!, key = { it.hashCode() }) { review ->
                                 Card(
-                                    modifier = Modifier.width(300.dp),
+                                    modifier = Modifier.width(300.dp).height(200.dp),
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
                                     shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp)
                                 ) {
-                                    Column(modifier = Modifier.padding(20.dp)) {
+                                    Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
                                         if (review.isSystemMessage) {
                                             Text(review.content, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
                                         } else {
@@ -311,8 +311,14 @@ fun DetailScreen(
                                                 Text(review.author, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSecondaryContainer, maxLines = 1)
                                             }
                                             Spacer(modifier = Modifier.height(12.dp))
-                                            Text(review.content, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSecondaryContainer, maxLines = 4, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                                            Spacer(modifier = Modifier.height(12.dp))
+                                            Text(
+                                                review.content, 
+                                                style = MaterialTheme.typography.bodyMedium, 
+                                                color = MaterialTheme.colorScheme.onSecondaryContainer, 
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .verticalScroll(rememberScrollState())
+                                            )
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Icon(
                                                     androidx.compose.material.icons.Icons.Default.Favorite, 
